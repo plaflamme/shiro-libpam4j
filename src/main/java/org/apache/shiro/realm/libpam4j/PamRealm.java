@@ -21,6 +21,7 @@ package org.apache.shiro.realm.libpam4j;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import org.apache.shiro.ShiroException;
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.AuthenticationInfo;
 import org.apache.shiro.authc.AuthenticationToken;
@@ -86,6 +87,7 @@ public class PamRealm extends AuthorizingRealm {
 			user = getPam().authenticate(upToken.getUsername(),
 					new String(upToken.getPassword()));
 		} catch (PAMException e) {
+			// Until libpam4j provides more details, we can only throw the top-level exception
 			throw new AuthenticationException(e);
 		}
 		return new SimpleAuthenticationInfo(new UnixUserPrincipal(user), upToken.getPassword(),
@@ -99,11 +101,20 @@ public class PamRealm extends AuthorizingRealm {
 			// Tests PAM "connectivity"
 			getPam();
 		} catch (PAMException e) {
-			throw new RuntimeException(e);
+			throw new ShiroException("Cannot obtain PAM subsystem.", e);
 		}
 	}
 
+	/**
+	 * Returns a {@code PAM} instance for the configured {@code service}.
+	 * <p>
+	 * Note that {@code PAM} instances are not reusable.
+	 * 
+	 * @return an instance of {@code PAM} usable for authenticating users
+	 * @throws PAMException when something bad happens
+	 */
 	protected PAM getPam() throws PAMException {
+		// PAM instances are not reusable.
 		return new PAM(service);
 	}
 
