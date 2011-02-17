@@ -1,0 +1,6 @@
+A Shiro realm for unix-style PAM authentication using libpam4j
+
+Using it in your shiro.ini file:
+[main]
+pamRealm=org.apache.shiro.realm.libpam4j.PamRealm
+pamRealm.service=common-auth
